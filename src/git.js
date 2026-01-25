@@ -32,8 +32,6 @@ export async function getStagedFiles() {
 
 export async function commitChanges(message) {
   try {
-    // Escape quotes in message to prevent shell issues
-    // basic escaping, might need more robust handling for complex messages with quotes
     const escapedMessage = message.replace(/"/g, '\\"');
     await execAsync(`git commit -m "${escapedMessage}"`);
     return true;

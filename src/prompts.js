@@ -1,72 +1,4 @@
-const ConventionalCommitsRules = `
-## CONVENTIONAL COMMIT RULES:
-- Allowed types: feat, fix, refactor, perf, test, docs, chore, build, ci, revert
-- Scope:
-  - infer from filenames if possible
-  - omit entirely if unclear
-- Summary:
-  - imperative mood
-  - max 72 characters
-  - no trailing period
-`
-
-const customTemplate = (template) =>  `# OUTPUT FORMAT (MANDATORY):
-You MUST generate output EXACTLY matching this template:
-${template}
-
-## RULES:
-- Follow the template line-by-line
-- OMIT a line entirely if no meaningful content exists
-- Do NOT add, rename, or reorder lines
-- Content MUST follow Conventional Commit semantics
-`;
-
 export const generateCommitMessagePrompt = (diff, template) => {
-    return `You are generating ONLY git commit message arguments.
-
-# Task:
-Generate commit message parts (-m "...") using the Conventional Commits standard,
-based ONLY on the provided git diff.
-
-# EXECUTION MODE (MANDATORY):
-- This is a NON-INTERACTIVE generation task.
-- Generate output only. No explanations.
-- Your ONLY responsibility is to generate the required output text.
-
-# OUTPUT CONTRACT:
-- Output ONLY lines that start exactly with: -m "
-- Each line must be a valid standalone git -m argument
-- Do NOT output git commit
-- Do NOT repeat or reference examples
-- Do NOT include explanations, markdown, headings, or blank lines
-
-# GLOBAL RULES:
-- Do NOT invent changes not present in the diff
-- Prefer clarity and determinism over creativity
-- If information is ambiguous, choose the simplest valid commit message
-- Do NOT escape quotes unless required for shell safety
-
-## BODY RULES:
-- Optional
-- Use bullet points only if they add clarity
-- LIMIT body to a maximum of 2 or 3 bullet points
-- MERGE related changes into a single bullet when possible
-- Prefer higher-level summaries over file-by-file descriptions
-- Describe WHAT changed and WHY, not HOW
-- If more than 3 related changes exist, summarize them into 1 or 2 bullets
-- If body adds no meaningful value beyond the summary, OMIT the body entirely
-
-
-${template ? customTemplate(template) : ConventionalCommitsRules}
-
-# INPUT DIFF (SOURCE OF TRUTH):
-
-GIT DIFF START:
-${diff.trim()} 
-GIT DIFF END`
-};
-
-export const generateMinimalCommitMessagePrompt = (diff, template) => {
     return `You generate ONLY git commit message arguments.
 
 TASK:
@@ -82,8 +14,8 @@ OUTPUT RULES:
 - Do NOT output git commit
 - Do NOT add extra text or blank lines
 
-FORMAT:
 ${template ? `
+FORMAT:
 Use EXACTLY this output template.
 Follow it line-by-line.
 Omit lines with no content.

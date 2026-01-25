@@ -26,27 +26,3 @@ export function shellescape(a) {
 
   return ret.join(' ');
 }
-
-export class Flags {
-  constructor(flags) {
-    this.flags = flags || [];
-  }
-
-    getFlagValue(flag) {
-    const index = this.flags.indexOf(flag);
-    if (index > -1 && index + 1 < this.flags.length) return this.flags[index + 1];
-    return null;
-    }
-
-    hasFlag(flag) {
-        return this.flags.includes(flag);
-    }
-}
-
-export function logDebug(...args) {
-    if (process.env.DEBUG) {
-        const now = new Date().toISOString();
-        const msg = args.map(String).join(' ');
-        console.debug(`[${now}] [debug] ${msg}`);
-  }
-}

@@ -8,7 +8,6 @@ export class Config {
     }
 
     loadConfig() {
-        // Look for project-level config (.msgrocketrc) or user-level in home
         try {
             const home = os.homedir();
             const projectPath = path.join(process.cwd(), '.msgrocketrc');

@@ -57,6 +57,10 @@ Use a custom template:
 ```bash
 msg-rocket commit --template ./my-template.txt
 ```
+Add tickets:
+```bash
+msg-rocket commit --t 12, 45
+```
 
 ### 2. Analyze Changes
 See a quick summary of what you are about to commit (type, breaking changes, files).
