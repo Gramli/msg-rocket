@@ -1,4 +1,5 @@
 import { spawn } from 'child_process';
+import { shellescape } from './utils/utils.js';
 
 const ANSI_REGEX = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 
@@ -7,10 +8,13 @@ function cleanOutput(output) {
 }
 
 export async function getSuggestion(prompt) {
-  return new Promise((resolve, reject) => {    
-    // Use the standalone copilot CLI
-    // User instruction: copilot "suggest <prompt>" (passed as single argument)
-    const child = spawn('copilot.cmd', ['-p', `@${prompt}`], {
+  return new Promise((resolve) => {    
+    const args = ['copilot', '-p', `@${prompt}`];
+    const escapedCommand = shellescape(args);
+    
+    console.log('[debug] Executing command:', escapedCommand);
+
+    const child = spawn(escapedCommand, {
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: true,
       env: { ...process.env } 
@@ -51,9 +55,11 @@ export async function getSuggestion(prompt) {
 
 export async function explain(prompt) {
     return new Promise((resolve, reject) => {
-        // Use standalone copilot CLI
-        // User instruction: copilot "explain <prompt>" (passed as single argument)
-        const child = spawn('copilot.cmd', ['-p', `@${prompt}`], {
+        // Use standalone copilot CLI with properly escaped arguments
+        const args = ['copilot', '-p', `@${prompt}`];
+        const escapedCommand = shellescape(args);
+        
+        const child = spawn(escapedCommand, {
             stdio: ['pipe', 'pipe', 'pipe'],
             shell: true
         });
@@ -74,8 +80,11 @@ export async function explain(prompt) {
 
 export async function checkCopilotInstalled() {
     return new Promise((resolve) => {
-        // Check for 'copilot' command
-        const child = spawn('copilot.cmd', ['--version'], {
+        // Check for 'copilot' command with properly escaped arguments
+        const args = ['copilot', '--version'];
+        const escapedCommand = shellescape(args);
+        
+        const child = spawn(escapedCommand, {
             stdio: ['ignore', 'ignore', 'ignore'],
             shell: true
         });
