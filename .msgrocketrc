@@ -1,0 +1,3 @@
+{
+  "commitTemplate": "chore: {{summary}}\n\n{{details}}\n\nCo-authored-by: {{author}}"
+}

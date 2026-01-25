@@ -1,0 +1,20 @@
+{
+  "name": "msg-rocket",
+  "version": "1.0.0",
+  "description": "A customized Git commit assistant powered by GitHub Copilot CLI",
+  "main": "bin/msg-rocket.js",
+  "type": "module",
+  "bin": {
+    "msg-rocket": "./bin/msg-rocket.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "git",
+    "copilot",
+    "cli"
+  ],
+  "author": "",
+  "license": "ISC"
+}
