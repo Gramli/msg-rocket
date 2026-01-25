@@ -15,7 +15,9 @@ const flags = new Flags(args.slice(1));
 const config = new Config();
 
 async function main() {
+    
     config.loadConfig();
+
     if (!await isGitRepository()) {
         console.error('Error: Not a git repository.');
         process.exit(1);

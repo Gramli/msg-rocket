@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import { shellescape } from './utils/utils.js';
+import { logDebug, shellescape } from './utils/utils.js';
 
 const ANSI_REGEX = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 
@@ -8,11 +8,9 @@ function cleanOutput(output) {
 }
 
 export async function getSuggestion(prompt) {
-  return new Promise((resolve) => {    
+  return new Promise((resolve) => {
     const args = ['copilot', '-p', `@${prompt}`];
     const escapedCommand = shellescape(args);
-    
-    console.log('[debug] Executing command:', escapedCommand);
 
     const child = spawn(escapedCommand, {
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -24,18 +22,15 @@ export async function getSuggestion(prompt) {
     let stderrData = '';
     
     child.stdout.on('data', (data) => {
-        //console.log('[debug] copilot stdout:', data.toString());
       stdoutData += data.toString();
     });
 
     child.stderr.on('data', (data) => {
-        //console.log('[debug] copilot stderr:', data.toString());
       stderrData += data.toString();
     });
 
     child.on('close', (code) => {
-        // Fallback to stderr if stdout is empty
-        //console.log('[debug] copilot close with code:', code);
+            logDebug('copilot close with code:', code);
         const output = stdoutData.trim() || stderrData.trim();
         
         if (code !== 0 && stderrData) {
@@ -47,7 +42,8 @@ export async function getSuggestion(prompt) {
     });
     
     child.on('error', (err) => {
-                //console.log('[debug] copilot error:', err);
+           logDebug('copilot error:', err);
+        console.log('[debug] Error executing Copilot CLI:', err.message);
         resolve(null);
     });
   });

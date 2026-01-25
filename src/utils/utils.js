@@ -1,5 +1,5 @@
 // Simple spinner utility
-export function withSpinner(promise, message = 'Working...') {
+export function withSimpleSpinner(promise, message = 'Working...') {
     const spinnerChars = ['|', '/', '-', '\\'];
     let i = 0;
     process.stdout.write(message + ' ');
@@ -41,4 +41,12 @@ export class Flags {
     hasFlag(flag) {
         return this.flags.includes(flag);
     }
+}
+
+export function logDebug(...args) {
+    if (process.env.DEBUG) {
+        const now = new Date().toISOString();
+        const msg = args.map(String).join(' ');
+        console.debug(`[${now}] [debug] ${msg}`);
+  }
 }

@@ -1,11 +1,37 @@
+const ConventionalCommitsRules = `
+## CONVENTIONAL COMMIT RULES:
+- Allowed types: feat, fix, refactor, perf, test, docs, chore, build, ci, revert
+- Scope:
+  - infer from filenames if possible
+  - omit entirely if unclear
+- Summary:
+  - imperative mood
+  - max 72 characters
+  - no trailing period
+`
+
+const customTemplate = (template) =>  `# OUTPUT FORMAT (MANDATORY):
+You MUST generate output EXACTLY matching this template:
+${template}
+
+## RULES:
+- Follow the template line-by-line
+- OMIT a line entirely if no meaningful content exists
+- Do NOT add, rename, or reorder lines
+- Content MUST follow Conventional Commit semantics
+`;
+
 export const generateCommitMessagePrompt = (diff, template) => {
-    return `
-You are generating ONLY git commit message arguments.
+    return `You are generating ONLY git commit message arguments.
 
 # Task:
 Generate commit message parts (-m "...") using the Conventional Commits standard,
 based ONLY on the provided git diff.
 
+# EXECUTION MODE (MANDATORY):
+- This is a NON-INTERACTIVE generation task.
+- Generate output only. No explanations.
+- Your ONLY responsibility is to generate the required output text.
 
 # OUTPUT CONTRACT:
 - Output ONLY lines that start exactly with: -m "
@@ -20,16 +46,6 @@ based ONLY on the provided git diff.
 - If information is ambiguous, choose the simplest valid commit message
 - Do NOT escape quotes unless required for shell safety
 
-## CONVENTIONAL COMMIT RULES:
-- Allowed types: feat, fix, refactor, perf, test, docs, chore, build, ci, revert
-- Scope:
-  - infer from filenames if possible
-  - omit entirely if unclear
-- Summary:
-  - imperative mood
-  - max 72 characters
-  - no trailing period
-
 ## BODY RULES:
 - Optional
 - Use bullet points only if they add clarity
@@ -40,43 +56,8 @@ based ONLY on the provided git diff.
 - If more than 3 related changes exist, summarize them into 1 or 2 bullets
 - If body adds no meaningful value beyond the summary, OMIT the body entirely
 
-## FOOTER RULES:
-- Optional
-- Include ONLY if applicable
-- For breaking changes, include exactly:
-  BREAKING CHANGE: <clear description>
 
-## BREAKING CHANGE DETECTION:
-- Include a BREAKING CHANGE footer ONLY if:
-  - public API shape changes
-  - function or field is renamed or removed
-  - request/response schema changes
-  - database schema changes
-  - significant behavior changes that may impact users
-  - other changes that would require users to modify their code
-  - documentation updates alone do NOT justify BREAKING CHANGE
-  - If unsure, choose NOT to include BREAKING CHANGE
-- Otherwise, OMIT footer entirely
-
-# IMPORTANT:
-The following examples are for guidance only.
-Do NOT repeat them in the output.
-
-# EXAMPLES (NON-OUTPUT):
-## Simple Change
--m "fix(validation): allow plus sign in email addresses"
-
-## Feature with body
--m "feat(users): add GET /users endpoint"
--m "- return all users from in-memory store"
-
-# Breaking change
--m "feat(users): rename email to contactEmail"
--m "- update validation and service layer"
--m "BREAKING CHANGE: user.email has been renamed to user.contactEmail"
-
-TEMPLATE CONTEXT:
-${template || "Conventional commit rules"}
+${template ? customTemplate(template) : ConventionalCommitsRules}
 
 # INPUT DIFF (SOURCE OF TRUTH):
 
@@ -84,6 +65,52 @@ GIT DIFF START:
 ${diff.trim()} 
 GIT DIFF END`
 };
+
+export const generateMinimalCommitMessagePrompt = (diff, template) => {
+    return `You generate ONLY git commit message arguments.
+
+TASK:
+Generate commit message parts (-m "...") from the provided git diff.
+
+EXECUTION MODE:
+- NON-INTERACTIVE
+- Output only. No questions. No explanations.
+
+OUTPUT RULES:
+- Output ONLY lines starting exactly with: -m "
+- Each line must be a valid standalone git -m argument
+- Do NOT output git commit
+- Do NOT add extra text or blank lines
+
+FORMAT:
+${template ? `
+Use EXACTLY this output template.
+Follow it line-by-line.
+Omit lines with no content.
+Do NOT add, rename, or reorder lines.
+
+${template}
+` : ''}
+
+SEMANTICS (MANDATORY):
+- Use Conventional Commits
+- Allowed types: feat, fix, refactor, perf, test, docs, chore, build, ci, revert
+- Scope: infer from filenames or omit
+- Summary: imperative, ≤72 chars, no period
+
+BODY:
+- Optional
+- Max 2 bullets
+- Describe WHAT and WHY, not HOW
+- Omit if redundant
+
+SOURCE OF TRUTH:
+Use ONLY the following git diff.
+
+GIT DIFF:
+${diff.trim()}
+`
+}
 
 export const generatePRDescriptionPrompt = (diff, template) => {
     return `
