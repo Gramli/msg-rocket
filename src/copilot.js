@@ -1,12 +1,46 @@
+import fs from "fs";
+import path from "path";
 import { spawn } from "child_process";
-import { shellescape } from "./utils/utils.js";
+import { shellescape, ensureMsgrocketTmpDir } from "./utils/utils.js";
 import { log, LOG_LEVELS } from "./utils/logger.js";
 
-const ANSI_REGEX =
-  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+const COPILOT_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-function cleanOutput(output) {
-  return output.replace(ANSI_REGEX, "").trim();
+// Use a fixed name for the Copilot CLI check cache file in the msgrocket temp dir
+function getCopilotCacheFilePath() {
+  const dir = ensureMsgrocketTmpDir();
+  return path.join(dir, "copilot_cli_check.json");
+}
+
+export async function checkCopilotInstalledCached() {
+  // Try to read cache
+  try {
+    const cacheFile = getCopilotCacheFilePath();
+    if (fs.existsSync(cacheFile)) {
+      const data = JSON.parse(fs.readFileSync(cacheFile, "utf-8"));
+      if (
+        data &&
+        data.ok !== undefined &&
+        data.ts &&
+        Date.now() - data.ts < COPILOT_CACHE_TTL_MS
+      ) {
+        return data.ok;
+      }
+    }
+  } catch (e) {
+    // Ignore cache errors, fallback to check
+  }
+  // Fallback: run real check
+  const ok = await checkCopilotInstalled();
+  // Write cache
+  try {
+    const cacheFile = getCopilotCacheFilePath();
+    // Use writeTempFile but with fixed name, so we overwrite the cache file
+    fs.writeFileSync(cacheFile, JSON.stringify({ ok, ts: Date.now() }), "utf-8");
+  } catch (e) {
+    // Ignore write errors
+  }
+  return ok;
 }
 
 export async function getSuggestion(prompt) {
@@ -46,31 +80,6 @@ export async function getSuggestion(prompt) {
     child.on("error", (err) => {
       log(LOG_LEVELS.DEBUG, "copilot error:", err);
       log(LOG_LEVELS.DEBUG, "Error executing Copilot CLI:", err.message);
-      resolve(null);
-    });
-  });
-}
-
-export async function explain(prompt) {
-  return new Promise((resolve, reject) => {
-    // Use standalone copilot CLI with properly escaped arguments
-    const args = ["copilot", "-p", `@${prompt}`];
-    const escapedCommand = shellescape(args);
-
-    const child = spawn(escapedCommand, {
-      stdio: ["pipe", "pipe", "pipe"],
-      shell: true,
-    });
-
-    let output = "";
-    child.stdout.on("data", (data) => (output += data.toString()));
-    child.stderr.on("data", (data) => (output += data.toString()));
-
-    child.on("close", () => {
-      resolve(cleanOutput(output));
-    });
-
-    child.on("error", (err) => {
       resolve(null);
     });
   });

@@ -3,19 +3,19 @@ import path from "path";
 import { getStagedDiff, commitChanges } from "../git.js";
 import { getSuggestion } from "../copilot.js";
 import { generateCommitMessagePrompt } from "../prompts.js";
-import { cleanCopilotOutput } from "../formatter.js";
+import { cleanCopilotOutput } from "../utils/formatter.js";
 import readline from "readline";
-import { withSimpleSpinner } from "../utils/utils.js";
+import { measureWithSpinner } from "../utils/utils.js";
 import os from "os";
 import { spawnSync } from "child_process";
-import { log, LOG_LEVELS, logWithColor, COLOR_NAMES } from "../utils/logger.js";
+import { log, LOG_LEVELS, printBox, COLOR_NAMES } from "../utils/logger.js";
+import { writeTempFile } from "../utils/utils.js";
+import { removeFile } from "../utils/utils.js";
 
-const interactive = "--i";
+const force = "--f";
 const taskFlag = "--t";
-const templateFlag = "--template";
 
 export async function handleCommit(flags, config) {
-  
   log(LOG_LEVELS.INFO, "Preparing to generate commit message...");
 
   const diff = await getStagedDiff();
@@ -24,31 +24,31 @@ export async function handleCommit(flags, config) {
     return;
   }
 
-  const template = getTemplateIfExists(flags, config);
+  const template = getTemplateIfExists(config);
 
-  log(LOG_LEVELS.INFO, "Generating commit message with GitHub Copilot.");
+  log(LOG_LEVELS.INFO, "Generating commit message with GitHub Copilot...");
   const prompt = generateCommitMessagePrompt(diff, template);
 
-  log(LOG_LEVELS.DEBUG, "Writing prompt to temporary file for Copilot CLI.");
-  const tmpFilePath = path.join(os.tmpdir(), `copilot_${Date.now()}.prompt.md`);
-  fs.writeFileSync(tmpFilePath, prompt, "utf-8");
-  log(LOG_LEVELS.DEBUG, "Prompt written to temporary file: ", tmpFilePath);
+  const tmpFilePath = writeTempFile(prompt, "copilot_commit", ".prompt.md");
 
-  const startTime = Date.now();
-  const rawSuggestion = '-m "HI"'; // await withSimpleSpinner(getSuggestion(tmpFilePath), 'Waiting for Copilot response... ');
-  const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-  log(LOG_LEVELS.DEBUG, `Copilot response time: ${elapsed} seconds`);
+  const { result: rawSuggestion, elapsedSeconds } = await measureWithSpinner(
+    () => getSuggestion(tmpFilePath),
+    "Waiting for Copilot response... ",
+  );
+  log(LOG_LEVELS.DEBUG, `Copilot response time: ${elapsedSeconds} seconds`);
   log(LOG_LEVELS.DEBUG, "Raw suggestion from Copilot:", rawSuggestion);
 
   let commitMsg = cleanCopilotOutput(
     cleanCopilotCommitMessageOutput(rawSuggestion),
   );
 
-  try {
-    fs.unlinkSync(tmpFilePath);
-  } catch (err) {
-    log(LOG_LEVELS.WARNING, "Warning: Could not delete temp prompt file:", tmpFilePath);
-  }
+  removeFile(tmpFilePath, (file) =>
+    log(
+      LOG_LEVELS.WARNING,
+      "Warning: Could not delete temp prompt file:",
+      file,
+    ),
+  );
 
   if (!commitMsg) {
     commitMsg = "chore: update (Copilot failed to generate)";
@@ -56,7 +56,7 @@ export async function handleCommit(flags, config) {
 
   commitMsg = appendTicketRefs(flags, commitMsg);
 
-  if (flags.hasFlag(interactive)) {
+  if (!flags.hasFlag(force)) {
     commitMsg = await interactiveMode(commitMsg);
   }
 
@@ -71,12 +71,9 @@ export async function handleCommit(flags, config) {
   }
 }
 
-function getTemplateIfExists(flags, config) {
+function getTemplateIfExists(config) {
   let template = "";
-  if (flags.hasFlag(templateFlag)) {
-    log(LOG_LEVELS.DEBUG, `Using commit template from ${templateFlag} flag.`);
-    template = flags.getFlagValue(templateFlag);
-  } else if (config && config.config.msgTemplate) {
+  if (config && config.config.msgTemplate) {
     const ct = config.config.msgTemplate;
     if (typeof ct === "string") {
       if (fs.existsSync(ct)) {
@@ -116,9 +113,7 @@ async function interactiveMode(initialMsg) {
   let currentMsg = initialMsg;
 
   while (true) {
-    logWithColor("\n------------------------------------------------------------", COLOR_NAMES.YELLOW);
-    logWithColor(currentMsg, COLOR_NAMES.YELLOW);
-    logWithColor("------------------------------------------------------------", COLOR_NAMES.YELLOW);
+    printBox("📝 COMMIT COMMAND RESULTS",currentMsg, COLOR_NAMES.YELLOW);
     const answer = await new Promise((resolve) => {
       const rl = readline.createInterface({
         input: process.stdin,

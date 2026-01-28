@@ -1,21 +1,13 @@
 #!/usr/bin/env node
-import fs from "fs";
-import { isGitRepository, getStagedDiff, getStagedFiles } from "../src/git.js";
-import {
-  getSuggestion,
-  explain,
-  checkCopilotInstalled,
-} from "../src/copilot.js";
-import {
-  generatePRDescriptionPrompt,
-  explainDiffPrompt,
-} from "../src/prompts.js";
-import { analyzeDiff } from "../src/analyzer.js";
-import { cleanCopilotOutput, formatSection } from "../src/formatter.js";
+import { isGitRepository } from "../src/git.js";
+import { checkCopilotInstalledCached } from "../src/copilot.js";
 import { handleCommit } from "../src/commands/commit.js";
 import { Flags } from "../src/utils/flags.js";
 import { Config } from "../src/utils/config.js";
 import { log, LOG_LEVELS } from "../src/utils/logger.js";
+import { withSimpleSpinnerResult } from "../src/utils/utils.js";
+import { handleReview } from "../src/commands/review.js";
+import { handleClean } from "../src/commands/clean.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -31,17 +23,20 @@ async function main() {
         await checkGitAndCopilot();
         await handleCommit(flags, config);
         break;
-      case "analyze":
+      case "review":
         await checkGitAndCopilot();
-        await handleAnalyze();
+        await handleReview(flags, config);
         break;
-      case "explain":
+      case "clean":
         await checkGitAndCopilot();
-        await handleExplain();
+        await handleClean(flags);
         break;
-      case "pr":
+      case "standard":
         await checkGitAndCopilot();
-        await handlePR();
+        console.log("Standard command is not yet implemented.");
+        break;
+      case "help":
+        showHelp();
         break;
       default:
         showHelp();
@@ -52,15 +47,21 @@ async function main() {
   }
 }
 
-async function checkGitAndCopilot(){
-  console.log("Checking git repository...");
-  if (!(await isGitRepository())) {
+async function checkGitAndCopilot() {
+  const isGitRepo = await withSimpleSpinnerResult(
+    isGitRepository(),
+    "Checking git repository...",
+  );
+  if (!isGitRepo) {
     console.error("Error: Not a git repository.");
     process.exit(1);
   }
 
-  console.log("Checking Copilot installation...");
-  if (!(await checkCopilotInstalled())) {
+  const copilotInstalled = await withSimpleSpinnerResult(
+    checkCopilotInstalledCached(),
+    "Verifying Copilot CLI...",
+  );
+  if (!copilotInstalled) {
     console.error(
       'Error: Standalone "copilot" CLI is not installed or not working.',
     );
@@ -71,82 +72,44 @@ async function checkGitAndCopilot(){
   }
 }
 
-async function handleAnalyze() {
-  const diff = await getStagedDiff();
-  if (!diff) {
-    console.log("No staged changes.");
-    return;
-  }
-
-  console.log("Analyzing changes...");
-  const files = await getStagedFiles();
-  const result = await analyzeDiff(diff);
-
-  console.log(formatSection("Files Involved", files.join("\n")));
-  console.log(
-    formatSection("Copilot Analysis", result.raw || "No analysis returned"),
-  );
-  if (result.breakingDetected) {
-    console.log("\n⚠️  POTENTIAL BREAKING CHANGE DETECTED\n");
-  }
-}
-
-async function handleExplain() {
-  const diff = await getStagedDiff();
-  if (!diff) {
-    console.log("No staged changes.");
-    return;
-  }
-
-  console.log("Explaining changes with GitHub Copilot...");
-  // Use the prompt wrap to ensure formatted query for copilot -i
-  const prompt = explainDiffPrompt(diff);
-  const result = await explain(prompt);
-  console.log(result);
-}
-
-async function handlePR() {
-  const diff = await getStagedDiff();
-  if (!diff) {
-    console.log("No staged changes.");
-    return;
-  }
-
-  const templatePath = flags.getFlagValue("--template");
-  let template = "";
-  if (templatePath && fs.existsSync(templatePath)) {
-    template = fs.readFileSync(templatePath, "utf-8");
-  }
-
-  console.log("Generating PR description...");
-  const prompt = generatePRDescriptionPrompt(diff, template);
-
-  // Requirement: "pr -> gh copilot suggest"
-  const query = `suggest a command to echo the generated PR description. ${prompt}`;
-  const rawSuggestion = await getSuggestion(query);
-  const prDesc = cleanCopilotOutput(rawSuggestion);
-
-  console.log("\nProposed PR Description:\n");
-  console.log(prDesc);
-}
-
 function showHelp() {
-console.log(`\x1b[36m 🚀 msg-rocket: GitHub Copilot CLI powered git assistant\x1b[0m`);
-console.log(`
+  console.log(
+    `\x1b[36m 🚀 msg-rocket: GitHub Copilot CLI powered git assistant\x1b[0m`,
+  );
+  console.log(`
 Commands:
-  commit     Generate commit message for staged changes and commit them.
-             Information:
-                --i : Interactive mode to edit the generated message.
-                --template <file> : Use custom template for commit message generation.
-                --t <task1,task2,...> : Specify tasks or ticket references to include in the commit message.
-             Usage:
-                msg-rocket commit [--i] [--template <file>] [--t <task1,task2,...>]
-             Example:
-                msg-rocket commit --i --template ./commit_template.md --t JIRA-123,GH-456
-
-  analyze    Analyze staged changes for potential issues.\n
-  explain    Explain the staged changes in detail.\n
-  pr         Generate a pull request description for staged changes. \n`);
+  📝 commit    Generate commit message for staged changes in interactive mode where you can review and edit the message before committing.
+                Information:
+                      : interactive mode where you can review and edit the message before committing
+                  --f : force commit staged changes with generated message and skip interactive mode
+                  --t <task1,task2,...> : Specify tasks or ticket references to include in the commit message.
+                Usage:
+                  msg-rocket commit [--f] [--t <task1,task2,...>]
+                Example:
+                  msg-rocket commit --t JIRA-123,GH-456
+  👀 review    Review the code with focus on clean code, performance, or security. By default it focuses on clean code.
+                Information:
+                        :        Focus on clean code
+                  --perf:        Focus on performance issues
+                  --sec:         Focus on security issues
+                Usage:
+                  msg-rocket review [--perf|--sec]
+                Example:
+                  msg-rocket review --perf
+  ✨ clean     Remove debug artifacts (console.log/debugger/etc.) from staged diff.
+                Information:
+                      : analyzer debug artifacts from staged changes and show report
+                  --f : analyzer debug artifacts from staged changes and fix them automatically. Then show report.
+                Usage:
+                  msg-rocket clean [--f]
+                Example:
+                  msg-rocket clean
+  📏 standard  Check staged diff against team coding standards (rules injected in prompt). 
+                File path for team coding standards rules have to be set in config.
+                Usage:
+                  msg-rocket standard
+  ❓ help      Show this help message.
+  \n`);
 }
 
 main();

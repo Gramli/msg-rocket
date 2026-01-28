@@ -1,3 +1,12 @@
+// Log a message with info color and timestamp, but do not add a newline (for spinner inline usage)
+export function logInfoInline(message) {
+  const now = new Date().toISOString();
+  const COLORS = {
+    reset: "\x1b[0m",
+    cyan: "\x1b[36m"
+  };
+  process.stdout.write(`${COLORS.cyan}[${now}] [info]${COLORS.reset} ${message} `);
+}
 // Color name constants for autocompletion and to avoid typos
 export const COLOR_NAMES = {
   RESET: "reset",
@@ -42,6 +51,20 @@ export const LOG_LEVELS = {
 export function logWithColor(message, color) {
   const colorCode = COLORS[color] || COLORS.reset;
   console.log(`${colorCode}${message}${COLORS.reset}`);
+}
+
+export function printBox(title, message, color) {
+  const colorCode = COLORS[color] || COLORS.reset;
+  // Determine terminal width with sensible bounds
+  const cols = (process && process.stdout && process.stdout.columns) ? process.stdout.columns : 80;
+  const width = Math.max(10, Math.min(cols, 120));
+  const sep = '-'.repeat(width);
+
+  // Print box with color applied to borders and message
+  console.log(`${colorCode}${title}${COLORS.reset}`);
+  console.log(`${colorCode}${sep}`);
+  console.log(`${colorCode}${message}${COLORS.reset}`);
+  console.log(`${colorCode}${sep}${COLORS.reset}`);
 }
 
 export function log(logLevel, ...args) {

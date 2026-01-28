@@ -1,0 +1,9 @@
+test/
+tests/
+*.test.js
+test-*.js
+*.spec.js
+test-example.js
+.env
+.vscode/
+.github/
