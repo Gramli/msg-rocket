@@ -1,24 +1,30 @@
 import { getStagedDiff } from "../git.js";
-import { log, LOG_LEVELS, COLOR_NAMES, printBox } from "../utils/logger.js";
+import {
+  log,
+  LOG_LEVELS,
+  COLOR_NAMES,
+  printBox,
+  logCopilotResponse,
+} from "../utils/logger.js";
 import { getSuggestion } from "../copilot.js";
-import { generateCleanPrompt, generateCleanReportPrompt } from "../prompts.js";
-import { writeTempFile, removeFile, measureWithSpinner  } from "../utils/utils.js";
-import { cleanCopilotOutput } from "../utils/formatter.js";
+import { generateCleanReportPrompt } from "../prompts.js";
+import {
+  writeTempFile,
+  removeFile,
+  measureWithSpinner,
+} from "../utils/utils.js";
+import { cleanAndFormatCopilotOutput } from "../utils/formatter.js";
 
-export async function handleClean(flags) {
+export async function handleClean() {
   const diff = await getStagedDiff();
   if (!diff) {
-    log(LOG_LEVELS.INFO, "No staged changes to commit.");
+    log(LOG_LEVELS.INFO, "No staged changes to analyze.");
     return;
   }
 
-  let prompt = "";
-  if (flags.hasFlag("--f")) {
-    prompt = generateCleanPrompt(diff);
-  } else {
-    prompt = generateCleanReportPrompt(diff);
-  }
+  const prompt = generateCleanReportPrompt(diff);
 
+  log(LOG_LEVELS.INFO, "Generating clean report with GitHub Copilot...");
   const tmpFilePath = writeTempFile(prompt, "copilot_clean", ".prompt.md");
   const { result: rawSuggestion, elapsedSeconds } = await measureWithSpinner(
     () => getSuggestion(tmpFilePath),
@@ -33,23 +39,9 @@ export async function handleClean(flags) {
     ),
   );
 
-  log(LOG_LEVELS.DEBUG, `Copilot response time: ${elapsedSeconds} seconds`);
-  log(LOG_LEVELS.DEBUG, "Raw suggestion from Copilot:", rawSuggestion);
+  logCopilotResponse(elapsedSeconds, rawSuggestion);
 
-  const review = cleanCopilotOutput(
-    cleanCopilotCommitMessageOutput(rawSuggestion),
-  );
+  const review = cleanAndFormatCopilotOutput(rawSuggestion, "-c");
 
   printBox("✨ CLEAN COMMAND RESULTS", review, COLOR_NAMES.MAGENTA);
-}
-
-function cleanCopilotCommitMessageOutput(commitMsg) {
-  if (commitMsg) {
-    return commitMsg
-      .split("\n")
-      .filter((line) => line.trim().startsWith("-c"))
-      .map((line) => line.replace(/^-c\s*/, ""))
-      .join("\n");
-  }
-  return commitMsg;
 }

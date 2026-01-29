@@ -9,8 +9,7 @@ EXECUTION MODE:
 - Output only. No questions. No explanations.
 
 OUTPUT RULES:
-- Output ONLY lines starting exactly with: -m "
-- Each line must be a valid standalone git -m argument
+- Output ONLY lines starting exactly with: -m
 - Do NOT output git commit
 - Do NOT add extra text or blank lines
 
@@ -48,35 +47,6 @@ ${diff.trim()}
 `;
 };
 
-export const generateCleanPrompt = (diff) => {
-  return `Remove obvious debug artifacts from the staged diff.
-
-Remove only these items:
-- console.log(...) if it contains: debug, temp, test, TODO, FIXME or is obviously temporary
-- debugger;
-- if (false) { ... } blocks (temporary code)
-- hardcoded dummy data or mock objects (e.g., const user = { id: 1, name: 'test' })
-- unused imports/usings (only if clearly unused in the diff)
-
-Do NOT remove console.log that looks like real production logging.
-Do NOT remove console.log in existing code that is not part of the diff.
-
-Output format (exact):
-- Output ONLY lines starting exactly with: -c
-CLEAN REPORT:
-REMOVED:
-- <file>:<line> <description>
-- ...
-POTENTIAL (not removed):
-- <file>:<line> <description>
-
-If nothing removed and no potential items:
-CLEAN REPORT: Nothing to remove.
-
-GIT DIFF:
-${diff.trim()}`;
-};
-
 export const generateCleanReportPrompt = (diff) => {
   return `Analyze the staged diff and report debug artifacts and temporary code.
 
@@ -105,13 +75,14 @@ GIT DIFF:
 ${diff.trim()}`;
 };
 
-export const codingStandardsPrompt = (diff) => {
+export const codingStandardsPrompt = (diff, rules) => {
   return `You are a CLI tool that checks coding standards.
 
 Do NOT modify code. Only analyze the staged diff.
 
 TEAM CODING STANDARDS:
 ${rules}
+TEAM CODING STANDARDS END
 
 Output format (exact):
 - Output ONLY lines starting exactly with: -s

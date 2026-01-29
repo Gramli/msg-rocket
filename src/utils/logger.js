@@ -90,3 +90,8 @@ export function log(logLevel, ...args) {
       console.log(`[${now}] [info] ${COLORS.reset}${msg}${COLORS.reset}`);
   }
 }
+
+export function logCopilotResponse(elapsedSeconds, rawSuggestion) {
+  log(LOG_LEVELS.DEBUG, `Copilot response time: ${elapsedSeconds} seconds`);
+  log(LOG_LEVELS.DEBUG, "Raw suggestion from Copilot:", rawSuggestion);
+}

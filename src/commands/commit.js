@@ -8,7 +8,7 @@ import readline from "readline";
 import { measureWithSpinner } from "../utils/utils.js";
 import os from "os";
 import { spawnSync } from "child_process";
-import { log, LOG_LEVELS, printBox, COLOR_NAMES } from "../utils/logger.js";
+import { log, LOG_LEVELS, printBox, COLOR_NAMES, logCopilotResponse } from "../utils/logger.js";
 import { writeTempFile } from "../utils/utils.js";
 import { removeFile } from "../utils/utils.js";
 
@@ -35,12 +35,13 @@ export async function handleCommit(flags, config) {
     () => getSuggestion(tmpFilePath),
     "Waiting for Copilot response... ",
   );
-  log(LOG_LEVELS.DEBUG, `Copilot response time: ${elapsedSeconds} seconds`);
-  log(LOG_LEVELS.DEBUG, "Raw suggestion from Copilot:", rawSuggestion);
+
+  logCopilotResponse(elapsedSeconds, rawSuggestion);
 
   let commitMsg = cleanCopilotOutput(
     cleanCopilotCommitMessageOutput(rawSuggestion),
   );
+
 
   removeFile(tmpFilePath, (file) =>
     log(
@@ -61,9 +62,9 @@ export async function handleCommit(flags, config) {
   }
 
   if (commitMsg) {
-    log(LOG_LEVELS.INFO, "\nCommit Message:\n");
+    log(LOG_LEVELS.INFO, "Commit Message:\n");
     log(LOG_LEVELS.INFO, commitMsg);
-    log(LOG_LEVELS.INFO, "\nCommitting...");
+    log(LOG_LEVELS.INFO, "Committing...");
     await commitChanges(commitMsg);
     log(LOG_LEVELS.INFO, "Success!");
   } else {

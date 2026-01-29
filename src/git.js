@@ -32,8 +32,12 @@ export async function getStagedFiles() {
 
 export async function commitChanges(message) {
   try {
-    const escapedMessage = message.replace(/"/g, '\\"');
-    await execAsync(`git commit -m "${escapedMessage}"`);
+    const messages = String(message).split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    if (messages.length === 0){ 
+      throw new Error('Commit message is empty');
+    }
+    const flags = messages.join(' ');
+    await execAsync(`git commit ${flags}`);
     return true;
   } catch (error) {
     throw new Error('Failed to commit changes: ' + error.message);

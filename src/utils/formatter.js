@@ -2,6 +2,17 @@ export function formatSection(title, content) {
     return `\n## ${title}\n${content}\n`;
 }
 
+export function cleanAndFormatCopilotOutput(commitMsg, prefix) {
+  if (commitMsg) {
+    return commitMsg
+      .split("\n")
+      .filter((line) => line.trim().startsWith(prefix))
+      .map((line) => line.replace(new RegExp(`^${prefix}\\s*`), ""))
+      .join("\n");
+  }
+  return cleanCopilotOutput(commitMsg);
+}
+
 export function cleanCopilotOutput(output) {
     if (!output) return "";
     

@@ -1,5 +1,5 @@
 {
   "DEBUG": true,
   "commitTemplate": "chore: {{summary}}\n\n{{details}}\n\nCo-authored-by: {{author}}",
-  "teamCodingStandardsPath": "coding-standards.md"
+  "teamCodingStandards": "coding-standards.md"
 }

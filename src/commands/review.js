@@ -4,18 +4,17 @@ import { getSuggestion } from "../copilot.js";
 import { writeTempFile } from "../utils/utils.js";
 import { getStagedDiff } from "../git.js";
 import { measureWithSpinner } from "../utils/utils.js";
-import { cleanCopilotOutput } from "../utils/formatter.js";
-import { COLOR_NAMES } from "../utils/logger.js";
+import { cleanAndFormatCopilotOutput } from "../utils/formatter.js";
+import { COLOR_NAMES, logCopilotResponse, printBox } from "../utils/logger.js";
 import { removeFile } from "../utils/utils.js";
 
-export async function handleReview(flags, config) {
+export async function handleReview(flags) {
   const diff = await getStagedDiff();
   if (!diff) {
-    log(LOG_LEVELS.INFO, "No staged changes to review.");
+    log(LOG_LEVELS.INFO, "No staged changes to analyze.");
     return;
   }
 
-  log(LOG_LEVELS.INFO, "Reviewing changes...");
   await analyzeDiff(diff, flags);
 }
 
@@ -27,6 +26,7 @@ export async function analyzeDiff(diff, flags) {
     focus = "sec";
   }
 
+  log(LOG_LEVELS.INFO, "Generating review with GitHub Copilot...");
   const prompt = reviewPrompt(diff, focus);
   const tmpFilePath = writeTempFile(prompt, "copilot_review", ".prompt.md");
   const { result: rawSuggestion, elapsedSeconds } = await measureWithSpinner(
@@ -34,7 +34,7 @@ export async function analyzeDiff(diff, flags) {
     "Waiting for Copilot response... ",
   );
 
-   removeFile(tmpFilePath, (file) =>
+  removeFile(tmpFilePath, (file) =>
     log(
       LOG_LEVELS.WARNING,
       "Warning: Could not delete temp prompt file:",
@@ -42,23 +42,9 @@ export async function analyzeDiff(diff, flags) {
     ),
   );
 
-  log(LOG_LEVELS.DEBUG, `Copilot response time: ${elapsedSeconds} seconds`);
-  log(LOG_LEVELS.DEBUG, "Raw suggestion from Copilot:", rawSuggestion);
+  logCopilotResponse(elapsedSeconds, rawSuggestion);
 
-  const review = cleanCopilotOutput(
-    cleanCopilotCommitMessageOutput(rawSuggestion),
-  );
+  const review = cleanAndFormatCopilotOutput(rawSuggestion, "-r");
 
   printBox("👀 REVIEW COMMAND RESULTS", review, COLOR_NAMES.CYAN);
-}
-
-function cleanCopilotCommitMessageOutput(commitMsg) {
-  if (commitMsg) {
-    return commitMsg
-      .split("\n")
-      .filter((line) => line.trim().startsWith("-r"))
-      .map((line) => line.replace(/^-r\s*/, "-"))
-      .join("\n");
-  }
-  return commitMsg;
 }

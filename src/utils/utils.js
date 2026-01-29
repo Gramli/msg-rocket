@@ -1,7 +1,7 @@
 import os from "os";
 import fs from "fs";
 import path from "path";
-import { log, LOG_LEVELS } from "./logger.js";
+import { log, LOG_LEVELS, logInfoInline } from "./logger.js";
 
 // Ensure the msgrocket temp directory exists and return its path
 export function ensureMsgrocketTmpDir() {
@@ -35,9 +35,6 @@ export function writeTempFile(content, prefix = "copilot_", postfix = ".tmp") {
   log(LOG_LEVELS.DEBUG, "Prompt written to temporary file: ", tmpFilePath);
   return tmpFilePath;
 }
-
-// Internal helper for spinner logic
-import { logInfoInline } from "./logger.js";
 
 function runWithSpinner(promise, message, handleResult) {
   const spinnerChars = ["|", "/", "-", "\\"];

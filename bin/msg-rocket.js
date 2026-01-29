@@ -4,10 +4,10 @@ import { checkCopilotInstalledCached } from "../src/copilot.js";
 import { handleCommit } from "../src/commands/commit.js";
 import { Flags } from "../src/utils/flags.js";
 import { Config } from "../src/utils/config.js";
-import { log, LOG_LEVELS } from "../src/utils/logger.js";
 import { withSimpleSpinnerResult } from "../src/utils/utils.js";
 import { handleReview } from "../src/commands/review.js";
 import { handleClean } from "../src/commands/clean.js";
+import { handleStandard } from "../src/commands/standard.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -33,7 +33,7 @@ async function main() {
         break;
       case "standard":
         await checkGitAndCopilot();
-        console.log("Standard command is not yet implemented.");
+        await handleStandard(config);
         break;
       case "help":
         showHelp();
@@ -96,13 +96,8 @@ Commands:
                   msg-rocket review [--perf|--sec]
                 Example:
                   msg-rocket review --perf
-  ✨ clean     Remove debug artifacts (console.log/debugger/etc.) from staged diff.
-                Information:
-                      : analyzer debug artifacts from staged changes and show report
-                  --f : analyzer debug artifacts from staged changes and fix them automatically. Then show report.
+  ✨ clean     Analyze debug artifacts (console.log/debugger/etc.) from staged diff and show report.
                 Usage:
-                  msg-rocket clean [--f]
-                Example:
                   msg-rocket clean
   📏 standard  Check staged diff against team coding standards (rules injected in prompt). 
                 File path for team coding standards rules have to be set in config.
