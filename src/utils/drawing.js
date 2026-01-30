@@ -73,104 +73,110 @@ export function drawTieFighter(packageInfo) {
 
 export function drawPC() {
   const w = "⬜";
+  const d = "⚫";
   const s = "  ";
-  const width = 16;
+  const width = 18;
   const height = 12;
-  const framesOne = [
+
+  // Animation frame sequences
+  const frameSequences = [
     [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mW \x1b[0m${s.repeat(width-2)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
+      "W ",
+      "Wa",
+      "Wak ",
+      "Wake",
+      "Wake u",
+      "Wake up ",
+      "Wake up,",
+      "Wake up,  ",
+      "Wake up, N",
+      "Wake up, Ne ",
+      "Wake up, Neo",
+      "Wake up, Neo. ",
+      "Wake up, Neo..",
+      "Wake up, Neo... ",
     ],
     [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWa\x1b[0m${s.repeat(width - 2)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
+      "T ",
+      "Th  ",
+      "The ",
+      "The M ",
+      "The Ma  ",
+      "The Mat ",
+      "The Matr  ",
+      "The Matri ",
+      "The Matrix  ",
+      "The Matrix h  ",
+      "The Matrix ha ",
+      "The Matrix has  ",
+      "The Matrix has y  ",
+      "The Matrix has yo ",
+      "The Matrix has you  ",
+      "The Matrix has you. ",
+      "The Matrix has you..",
+      "The Matrix has you... ",
     ],
     [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWak \x1b[0m${s.repeat(width - 3)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake\x1b[0m${s.repeat(width - 3)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake u\x1b[0m${s.repeat(width - 4)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake up \x1b[0m${s.repeat(width - 5)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake up,\x1b[0m${s.repeat(width - 5)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake up,  \x1b[0m${s.repeat(width - 6)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake up, N\x1b[0m${s.repeat(width - 6)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake up, Ne \x1b[0m${s.repeat(width - 7)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake up, Neo\x1b[0m${s.repeat(width - 7)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake up, Neo. \x1b[0m${s.repeat(width - 8)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake up, Neo..\x1b[0m${s.repeat(width - 8)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
-    ],
-    [
-      `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32mWake up, Neo... \x1b[0m${s.repeat(width - 9)}${w}`,
-      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
-      `${w}${w.repeat(width)}${w}`,
+      "F ",
+      "Fo  ",
+      "Fol ",
+      "Folo  ",
+      "Folow ",
+      "Folow t ",
+      "Folow th  ",
+      "Folow the ",
+      "Folow the w ",
+      "Folow the wh  ",
+      "Folow the whi ",
+      "Folow the whit  ",
+      "Folow the white ",
+      "Folow the white r ",
+      "Folow the white ra  ",
+      "Folow the white rab ",
+      "Folow the white rabb  ",
+      "Folow the white rabbi   ",
+      "Folow the white rabbit  ",
+      "Folow the white rabbit. ",
     ],
   ];
-  let i = 0;
-  const interval = setInterval(() => {
-    console.clear();
-    console.log("\n\n"); // Add two blank lines for padding
-    framesOne[i].forEach((line) => console.log(line));
-    i++;
-    if (i === frames.length) {
-      clearInterval(interval);
-    }
-  }, 400);
 
+  // Generate a single frame
+  function generateFrame(text) {
+    return [
+      `${w}${w.repeat(width)}${w}`,
+      `${w}${s}\x1b[5m\x1b[32m${text}\x1b[0m${s.repeat(width - Math.ceil(text.length / 2) - 1)}${w}`,
+      ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
+      `${w}${w.repeat(width)}${w}`,
+      `${w}${w.repeat(width-2)}${d}${w}${w}`,
+    ];
+  }
+
+  // Run a sequence of frames
+  function runFrameSequence(frameTexts, delay, nextSequence) {
+    let i = 0;
+    const interval = setInterval(() => {
+      console.clear();
+      console.log("\n\n");
+      generateFrame(frameTexts[i]).forEach((line) => console.log(line));
+      i++;
+      if (i === frameTexts.length) {
+        clearInterval(interval);
+        if (nextSequence) setTimeout(nextSequence, 1500);
+      }
+    }, delay);
+  }
+
+  // Chain all sequences
+  function runAllSequences(sequences, delay) {
+    let seqIdx = 0;
+    function next() {
+      seqIdx++;
+      if (seqIdx < sequences.length) {
+        runFrameSequence(sequences[seqIdx], delay, next);
+      }
+    }
+    runFrameSequence(sequences[0], delay, next);
+  }
+
+  runAllSequences(frameSequences, 500);
 }
