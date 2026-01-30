@@ -178,5 +178,62 @@ export function drawPC() {
     runFrameSequence(sequences[0], delay, next);
   }
 
-  runAllSequences(frameSequences, 500);
+  function startMatrixRain(durationMs) {
+    const rainChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const rainCols = width;
+    const rainRows = height - 2;
+    let drops = Array(rainCols).fill(0).map(() => Math.floor(Math.random() * rainRows));
+    const start = Date.now();
+    const interval = setInterval(() => {
+      console.clear();
+      console.log("\n\n");
+      // Top border
+      console.log(`${w}${w.repeat(width)}${w}`);
+      // Rain rows
+      for (let row = 0; row < rainRows; row++) {
+        let line = w;
+        for (let col = 0; col < rainCols; col++) {
+          if (drops[col] === row) {
+            const char = rainChars[Math.floor(Math.random() * rainChars.length)];
+            line += `\x1b[32m${char}\x1b[0m${s.slice(1)}`;
+          } else {
+            line += s;
+          }
+        }
+        line += w;
+        console.log(line);
+      }
+      // Bottom border
+      console.log(`${w}${w.repeat(width)}${w}`);
+      console.log(`${w}${w.repeat(width-2)}${d}${w}${w}`);
+      // Move drops
+      for (let i = 0; i < rainCols; i++) {
+        if (Math.random() > 0.975) {
+          drops[i] = 0;
+        } else {
+          drops[i] = (drops[i] + 1) % rainRows;
+        }
+      }
+      if (Date.now() - start > durationMs) {
+        clearInterval(interval);
+      }
+    }, 75);
+  }
+
+  // Patch runAllSequences to call matrix rain after last sequence
+  //const origRunAllSequences = runAllSequences;
+  runAllSequences = function(sequences, delay) {
+    let seqIdx = 0;
+    function next() {
+      seqIdx++;
+      if (seqIdx < sequences.length) {
+        runFrameSequence(sequences[seqIdx], delay, next);
+      } else {
+        startMatrixRain(5000);
+      }
+    }
+    runFrameSequence(sequences[0], delay, next);
+  };
+
+  runAllSequences(frameSequences, 250);
 }
