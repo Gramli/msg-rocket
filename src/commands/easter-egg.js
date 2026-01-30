@@ -1,4 +1,4 @@
-import { hasGoodUnicodeSupport } from "./term.js";
+import { hasGoodUnicodeSupport } from "../utils/term.js";
 
 export function drawEasterEgg() {
   const terminalSupportsUnicode = hasGoodUnicodeSupport();

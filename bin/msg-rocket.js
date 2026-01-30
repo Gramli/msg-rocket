@@ -11,7 +11,7 @@ import { handleStandard } from "../src/commands/standard.js";
 import { handleUpToDate } from "../src/commands/up-to-date.js";
 import { showHelp } from "../src/commands/help.js";
 import { log, LOG_LEVELS } from "../src/utils/logger.js";
-import { drawEasterEgg } from "../src/utils/easter-egg.js";
+import { drawEasterEgg } from "../src/commands/easter-egg.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
