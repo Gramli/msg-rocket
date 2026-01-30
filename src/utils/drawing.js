@@ -193,7 +193,7 @@ export function drawPC() {
       for (let row = 0; row < rainRows; row++) {
         let line = w;
         for (let col = 0; col < rainCols; col++) {
-          if (drops[col] === row) {
+          if (drops[col] === row || Math.random() < 0.10) {
             const char = rainChars[Math.floor(Math.random() * rainChars.length)];
             line += `\x1b[32m${char}\x1b[0m${s.slice(1)}`;
           } else {
@@ -217,7 +217,7 @@ export function drawPC() {
       if (Date.now() - start > durationMs) {
         clearInterval(interval);
       }
-    }, 75);
+    }, 100);
   }
 
   // Patch runAllSequences to call matrix rain after last sequence
