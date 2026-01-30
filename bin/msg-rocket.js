@@ -8,9 +8,10 @@ import { withSimpleSpinnerResult } from "../src/utils/utils.js";
 import { handleReview } from "../src/commands/review.js";
 import { handleClean } from "../src/commands/clean.js";
 import { handleStandard } from "../src/commands/standard.js";
-import { drawTieFighter } from "../src/utils/drawing.js";
-import { getPackageJson } from "../src/utils/utils.js";
 import { handleUpToDate } from "../src/commands/up-to-date.js";
+import { showHelp } from "../src/commands/help.js";
+import { log, LOG_LEVELS } from "../src/utils/logger.js";
+import { drawPC } from "../src/utils/drawing.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -43,13 +44,16 @@ async function main() {
         await handleStandard(config);
         break;
       case "help":
-        showHelp();
+        showHelp(args[1]);
+        break;
+      case "draw":
+        drawPC();
         break;
       default:
         showHelp();
     }
   } catch (error) {
-    console.error("Error:", error.message);
+    log(LOG_LEVELS.ERROR, error.message);
     process.exit(1);
   }
 }
@@ -60,7 +64,7 @@ async function checkGitAndCopilot() {
     "Checking git repository...",
   );
   if (!isGitRepo) {
-    console.error("Error: Not a git repository.");
+    log(LOG_LEVELS.ERROR, "Current directory is not a git repository.");
     process.exit(1);
   }
 
@@ -69,57 +73,14 @@ async function checkGitAndCopilot() {
     "Verifying Copilot CLI...",
   );
   if (!copilotInstalled) {
-    console.error(
-      'Error: Standalone "copilot" CLI is not installed or not working.',
+    log(LOG_LEVELS.ERROR,
+      'Standalone "copilot" CLI is not installed or not working.',
     );
-    console.error(
+    log(LOG_LEVELS.ERROR,
       'Please ensure the "copilot" command is available in your PATH.',
     );
     process.exit(1);
   }
-}
-
-function showHelp() {
-
-  drawTieFighter(getPackageJson());
-  console.log(`
-Commands:
-  📝 commit    Generate commit message for staged changes in interactive mode where you can review and edit the message before committing.
-                Information:
-                      : interactive mode where you can review and edit the message before committing
-                  --f : force commit staged changes with generated message and skip interactive mode
-                  --t <task1,task2,...> : Specify tasks or ticket references to include in the commit message.
-                Usage:
-                  msg-rocket commit [--f] [--t <task1,task2,...>]
-                Example:
-                  msg-rocket commit --t JIRA-123,GH-456
-  🔄 uptodate  This command updates your branch with the newest code from the main branch and keeps your changes safe. 
-                It helps you avoid conflicts and makes sure you’re working on the latest version.
-                Information:
-                      : Updates your branch with the latest code from the main branch while keeping your changes safe.
-                  --m <main-branch-name> : Specify the name of the main branch (default is 'master').
-                Usage:
-                  msg-rocket uptodate [--m <main-branch-name>]
-                Example:
-                  msg-rocket uptodate
-  👀 review    Review the code with focus on clean code, performance, or security. By default it focuses on clean code.
-                Information:
-                        :        Focus on clean code
-                  --perf:        Focus on performance issues
-                  --sec:         Focus on security issues
-                Usage:
-                  msg-rocket review [--perf|--sec]
-                Example:
-                  msg-rocket review --perf
-  ✨ clean     Analyze debug artifacts (console.log/debugger/etc.) from staged diff and show report.
-                Usage:
-                  msg-rocket clean
-  📏 standard  Check staged diff against team coding standards (rules injected in prompt). 
-                File path for team coding standards rules have to be set in config.
-                Usage:
-                  msg-rocket standard
-  ❓ help      Show this help message.
-  \n`);
 }
 
 main();

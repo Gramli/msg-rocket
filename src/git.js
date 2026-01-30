@@ -30,7 +30,7 @@ export async function getStagedFiles() {
   }
 }
 
-export async function isOnMasterBranch(master = 'master') {
+export async function isOnMasterBranch(master = "master") {
   try {
     const currentBranch = await getCurrentBranch();
     return currentBranch === master;
@@ -57,7 +57,7 @@ export async function fetchOrigin() {
   }
 }
 
-export async function countBehindOrigin(branch = 'master') {
+export async function countBehindOrigin(branch = "master") {
   try {
     const { stdout } = await execAsync(
       `git rev-list --count ${branch}..origin/${branch}`,
@@ -76,55 +76,64 @@ export async function createStash(message = "msg-rocket stash") {
     if (match) {
       return `stash@{${match[1]}}`;
     }
-    return 'stash@{0}';
+    return "stash@{0}";
   } catch (error) {
     throw new Error("Failed to create stash: " + error.message);
   }
 }
 
-export async function pullOriginFFOnly() {
+export async function pullOriginFFOnly(branch = "master") {
   try {
-    await execAsync('git pull --ff-only origin');
+    await execAsync(`git pull --ff-only origin ${branch}`);
     return true;
   } catch (error) {
-    throw new Error('Failed to pull with --ff-only: ' + error.message);
+    throw new Error("Failed to pull with --ff-only: " + error.message);
   }
 }
 
 export async function applyStash(stashRef) {
   try {
-    const ref = stashRef || 'stash@{0}';
+    const ref = stashRef || "stash@{0}";
     await execAsync(`git stash apply ${ref}`);
     return true;
   } catch (error) {
-    throw new Error('Failed to apply stash: ' + error.message);
+    throw new Error("Failed to apply stash: " + error.message);
   }
 }
 
 export async function hasChanges() {
   try {
-    const { stdout } = await execAsync('git status --porcelain');
+    const { stdout } = await execAsync("git status --porcelain");
     return stdout.trim().length > 0;
   } catch (error) {
-    throw new Error('Failed to check for changes: ' + error.message);
+    throw new Error("Failed to check for changes: " + error.message);
   }
 }
 
-export async function switchToBranch(branch = 'master') {
+export async function switchToBranch(branch = "master") {
   try {
     await execAsync(`git checkout ${branch}`);
     return true;
   } catch (error) {
-    throw new Error('Failed to switch branch: ' + error.message);
+    throw new Error("Failed to switch branch: " + error.message);
   }
 }
 
-export async function rebaseOntoMaster(master = 'master') {
+export async function rebaseOntoMaster(master = "master") {
   try {
     await execAsync(`git rebase origin/${master}`);
     return true;
   } catch (error) {
-    throw new Error('Failed to rebase onto master: ' + error.message);
+    throw new Error("Failed to rebase onto master: " + error.message);
+  }
+}
+
+export async function dropStash(stashRef = "stash@{0}") {
+  try {
+    await execAsync(`git stash drop ${stashRef}`);
+    return true;
+  } catch (error) {
+    throw new Error("Failed to drop stash: " + error.message);
   }
 }
 
