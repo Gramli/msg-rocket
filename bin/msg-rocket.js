@@ -11,7 +11,7 @@ import { handleStandard } from "../src/commands/standard.js";
 import { handleUpToDate } from "../src/commands/up-to-date.js";
 import { showHelp } from "../src/commands/help.js";
 import { log, LOG_LEVELS } from "../src/utils/logger.js";
-import { drawPC } from "../src/utils/drawing.js";
+import { drawEasterEgg } from "../src/utils/easter-egg.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -46,8 +46,8 @@ async function main() {
       case "help":
         showHelp(args[1]);
         break;
-      case "draw":
-        drawPC();
+      case "easter-egg":
+        drawEasterEgg();
         break;
       default:
         showHelp();
