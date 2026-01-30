@@ -8,6 +8,7 @@ import { withSimpleSpinnerResult } from "../src/utils/utils.js";
 import { handleReview } from "../src/commands/review.js";
 import { handleClean } from "../src/commands/clean.js";
 import { handleStandard } from "../src/commands/standard.js";
+import { drawTieFighter } from "../src/utils/drawing.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -37,6 +38,9 @@ async function main() {
         break;
       case "help":
         showHelp();
+        break;
+      case "s":
+        drawTieFighter();
         break;
       default:
         showHelp();
@@ -73,9 +77,8 @@ async function checkGitAndCopilot() {
 }
 
 function showHelp() {
-  console.log(
-    `\x1b[36m 🚀 msg-rocket: GitHub Copilot CLI powered git assistant\x1b[0m`,
-  );
+
+  drawTieFighter();
   console.log(`
 Commands:
   📝 commit    Generate commit message for staged changes in interactive mode where you can review and edit the message before committing.

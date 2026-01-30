@@ -1,8 +1,5 @@
 export const generateCommitMessagePrompt = (diff, template) => {
-  return `You generate ONLY git commit message arguments.
-
-TASK:
-Generate commit message parts (-m "...") from the provided git diff.
+  return `Analyze the staged diff and generate commit message parts (-m "...").
 
 EXECUTION MODE:
 - NON-INTERACTIVE
@@ -33,14 +30,14 @@ SEMANTICS (MANDATORY):
 - Scope: infer from filenames or omit
 - Summary: imperative, ≤72 chars, no period
 
-BODY:
-- Optional
-- Max 2 bullets
+SIMPLICITY RULE (MANDATORY):
+- If the diff is trivial or self-explanatory, output ONLY one -m summary line.
+- Do NOT add a body for simple changes such as logging, formatting, comments, or minor guards.
+
+BODY (OPTIONAL):
+- Maximum 3-4 bullets
 - Describe WHAT and WHY, not HOW
 - Omit if redundant
-
-SOURCE OF TRUTH:
-Use ONLY the following git diff.
 
 GIT DIFF:
 ${diff.trim()}
