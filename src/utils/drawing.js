@@ -72,10 +72,11 @@ export function drawTieFighter(packageInfo) {
 }
 
 export function drawPC() {
-  const w = "⬜";
-  const d = "⚫";
-  const s = "  ";
-  const width = 18;
+  const terminalSupportsUnicode = hasGoodUnicodeSupport();
+  const w = terminalSupportsUnicode ? "⬜" : "#";
+  const d = terminalSupportsUnicode ? "⚫" : "@";
+  const s = terminalSupportsUnicode ? "  " : " ";
+  const width = terminalSupportsUnicode ? 18 : 36;
   const height = 12;
 
   // Animation frame sequences
@@ -141,13 +142,16 @@ export function drawPC() {
   ];
 
   // Generate a single frame
-  function generateFrame(text) {
+  function generateFrame(text, terminalSupportsUnicode) {
+    const repeatCount = terminalSupportsUnicode
+      ? width - Math.ceil(text.length / 2) - 1
+      : width - text.length - 1;
     return [
       `${w}${w.repeat(width)}${w}`,
-      `${w}${s}\x1b[5m\x1b[32m${text}\x1b[0m${s.repeat(width - Math.ceil(text.length / 2) - 1)}${w}`,
+      `${w}${s}\x1b[5m\x1b[32m${text}\x1b[0m${s.repeat(repeatCount)}${w}`,
       ...Array(height - 3).fill(`${w}${s.repeat(width)}${w}`),
       `${w}${w.repeat(width)}${w}`,
-      `${w}${w.repeat(width-2)}${d}${w}${w}`,
+      `${w}${w.repeat(width - 2)}${d}${w}${w}`,
     ];
   }
 
@@ -157,7 +161,9 @@ export function drawPC() {
     const interval = setInterval(() => {
       console.clear();
       console.log("\n\n");
-      generateFrame(frameTexts[i]).forEach((line) => console.log(line));
+      generateFrame(frameTexts[i], terminalSupportsUnicode).forEach((line) =>
+        console.log(line),
+      );
       i++;
       if (i === frameTexts.length) {
         clearInterval(interval);
@@ -179,10 +185,13 @@ export function drawPC() {
   }
 
   function startMatrixRain(durationMs) {
-    const rainChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const rainChars =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const rainCols = width;
     const rainRows = height - 2;
-    let drops = Array(rainCols).fill(0).map(() => Math.floor(Math.random() * rainRows));
+    let drops = Array(rainCols)
+      .fill(0)
+      .map(() => Math.floor(Math.random() * rainRows));
     const start = Date.now();
     const interval = setInterval(() => {
       console.clear();
@@ -193,8 +202,9 @@ export function drawPC() {
       for (let row = 0; row < rainRows; row++) {
         let line = w;
         for (let col = 0; col < rainCols; col++) {
-          if (drops[col] === row || Math.random() < 0.10) {
-            const char = rainChars[Math.floor(Math.random() * rainChars.length)];
+          if (drops[col] === row || Math.random() < 0.1) {
+            const char =
+              rainChars[Math.floor(Math.random() * rainChars.length)];
             line += `\x1b[32m${char}\x1b[0m${s.slice(1)}`;
           } else {
             line += s;
@@ -205,7 +215,7 @@ export function drawPC() {
       }
       // Bottom border
       console.log(`${w}${w.repeat(width)}${w}`);
-      console.log(`${w}${w.repeat(width-2)}${d}${w}${w}`);
+      console.log(`${w}${w.repeat(width - 2)}${d}${w}${w}`);
       // Move drops
       for (let i = 0; i < rainCols; i++) {
         if (Math.random() > 0.975) {
@@ -221,8 +231,7 @@ export function drawPC() {
   }
 
   // Patch runAllSequences to call matrix rain after last sequence
-  //const origRunAllSequences = runAllSequences;
-  runAllSequences = function(sequences, delay) {
+  runAllSequences = function (sequences, delay) {
     let seqIdx = 0;
     function next() {
       seqIdx++;
