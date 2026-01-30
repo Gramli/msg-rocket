@@ -16,7 +16,6 @@ export function cleanAndFormatCopilotOutput(commitMsg, prefix) {
 export function cleanCopilotOutput(output) {
     if (!output) return "";
     
-    // Remove "echo" or quotes if Copilot suggest returned a command like 'echo "message"'
     let clean = output.trim();
     if (clean.startsWith('echo')) {
         clean = clean.substring(4).trim();

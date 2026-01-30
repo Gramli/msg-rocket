@@ -9,6 +9,8 @@ import { handleReview } from "../src/commands/review.js";
 import { handleClean } from "../src/commands/clean.js";
 import { handleStandard } from "../src/commands/standard.js";
 import { drawTieFighter } from "../src/utils/drawing.js";
+import { getPackageJson } from "../src/utils/utils.js";
+import { handleUpToDate } from "../src/commands/up-to-date.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -24,6 +26,10 @@ async function main() {
         await checkGitAndCopilot();
         await handleCommit(flags, config);
         break;
+      case "uptodate":
+        await checkGitAndCopilot();
+        await handleUpToDate(flags);
+        break;
       case "review":
         await checkGitAndCopilot();
         await handleReview(flags, config);
@@ -38,9 +44,6 @@ async function main() {
         break;
       case "help":
         showHelp();
-        break;
-      case "s":
-        drawTieFighter();
         break;
       default:
         showHelp();
@@ -78,7 +81,7 @@ async function checkGitAndCopilot() {
 
 function showHelp() {
 
-  drawTieFighter();
+  drawTieFighter(getPackageJson());
   console.log(`
 Commands:
   📝 commit    Generate commit message for staged changes in interactive mode where you can review and edit the message before committing.
@@ -90,6 +93,15 @@ Commands:
                   msg-rocket commit [--f] [--t <task1,task2,...>]
                 Example:
                   msg-rocket commit --t JIRA-123,GH-456
+  🔄 uptodate  This command updates your branch with the newest code from the main branch and keeps your changes safe. 
+                It helps you avoid conflicts and makes sure you’re working on the latest version.
+                Information:
+                      : Updates your branch with the latest code from the main branch while keeping your changes safe.
+                  --m <main-branch-name> : Specify the name of the main branch (default is 'master').
+                Usage:
+                  msg-rocket uptodate [--m <main-branch-name>]
+                Example:
+                  msg-rocket uptodate
   👀 review    Review the code with focus on clean code, performance, or security. By default it focuses on clean code.
                 Information:
                         :        Focus on clean code

@@ -1,7 +1,7 @@
 {
   "name": "msg-rocket",
-  "version": "1.0.0",
-  "description": "A customized Git commit assistant powered by GitHub Copilot CLI",
+  "version": "0.0.5",
+  "description": "A customized CLI assistant powered by GitHub Copilot CLI",
   "main": "bin/msg-rocket.js",
   "type": "module",
   "bin": {
@@ -21,5 +21,9 @@
     "README.md"
   ],
   "author": "Daniel Balcarek",
-  "license": "ISC"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gramli/msg-rocket"
+  }
 }

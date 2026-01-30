@@ -2,6 +2,7 @@ import os from "os";
 import fs from "fs";
 import path from "path";
 import { log, LOG_LEVELS, logInfoInline } from "./logger.js";
+import { fileURLToPath } from "url";
 
 // Ensure the msgrocket temp directory exists and return its path
 export function ensureMsgrocketTmpDir() {
@@ -69,7 +70,10 @@ export async function withSimpleSpinnerResult(promise, message = "Working...") {
 
 // Measure the elapsed time (in seconds) of an async function while showing a spinner.
 // Returns: { result, elapsedSeconds }
-export async function measureWithSpinner(asyncFn, spinnerMessage = "Working...") {
+export async function measureWithSpinner(
+  asyncFn,
+  spinnerMessage = "Working...",
+) {
   const start = Date.now();
   const result = await withSimpleSpinnerResult(asyncFn(), spinnerMessage);
   const elapsed = ((Date.now() - start) / 1000).toFixed(2);
@@ -90,4 +94,21 @@ export function shellescape(a) {
   });
 
   return ret.join(" ");
+}
+
+/**
+ * Loads version, author, and description from package.json
+ * @returns {{version: string, author: string, description: string}}
+ */
+export function getPackageJson() {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const pkgPath = path.resolve(__dirname, "../../package.json");
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+  return {
+    version: pkg.version || "",
+    author: pkg.author || "",
+    description: pkg.description || "",
+    license: pkg.license || "",
+  };
 }
