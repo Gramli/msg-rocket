@@ -46,7 +46,7 @@ async function main() {
       case "help":
         showHelp(args[1]);
         break;
-      case "easter-egg":
+      case "matrix":
         drawEasterEgg();
         break;
       default:

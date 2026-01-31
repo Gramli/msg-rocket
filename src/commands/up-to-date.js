@@ -1,7 +1,7 @@
 import {
   applyStash,
   hasChanges,
-  fetchOrigin,
+  branchExistsRemotely,
   getCurrentBranch,
   countBehindOrigin,
   createStash,
@@ -19,9 +19,18 @@ export async function handleUpToDate(flags) {
   const masterBranch = flags.hasFlag(mainBranchFlag)
     ? flags.getFlagValue(mainBranchFlag)
     : "master";
-  await fetchOrigin();
+
+  const branchExists = await branchExistsRemotely(masterBranch);
+  if (!branchExists) {
+    log(
+      LOG_LEVELS.ERROR,
+      `The specified main branch '${masterBranch}' does not exist on the remote.`,
+    );
+    return;
+  }
+
   const isMaster = await isOnMasterBranch(masterBranch);
-  if (isMaster) {
+  if (isMaster && branchExists) {
     if ((await hasChanges()) && (await countBehindOrigin(masterBranch)) > 0) {
       log(LOG_LEVELS.INFO, "Staged changes that are not committed.");
       const stashRef = await createStash();
@@ -44,7 +53,7 @@ export async function handleUpToDate(flags) {
   } else {
     const branch = await getCurrentBranch();
     log(LOG_LEVELS.INFO, `Current branch is '${branch}'`);
-    if ((await hasChanges()) && (await countBehindOrigin(branch)) > 0) {
+    if (await hasChanges() && (await countBehindOrigin(masterBranch)) > 0) {
       log(LOG_LEVELS.INFO, "Staged changes that are not committed.");
       const stashRef = await createStash();
       log(LOG_LEVELS.INFO, "Stashed staged changes.");
@@ -66,9 +75,9 @@ export async function handleUpToDate(flags) {
     } else {
       log(
         LOG_LEVELS.INFO,
-        `Repository is up-to-date with origin/${branch}. No staged changes.`,
+        `Repository is up-to-date with origin/${masterBranch}. No staged changes.`,
       );
     }
-    log(LOG_LEVELS.INFO, "Up-to-date job completed.");
   }
+  log(LOG_LEVELS.INFO, "Up-to-date job completed.");
 }

@@ -1,7 +1,8 @@
 import { hasGoodUnicodeSupport } from "../utils/term.js";
 
 // Animation frame sequences
-const frameSequences = [
+const scene2FrameSequences = [
+  ["", ""],
   [
     "W ",
     "Wa",
@@ -78,8 +79,9 @@ export function drawEasterEgg() {
   const terminalSupportsUnicode = hasGoodUnicodeSupport();
   const width = terminalSupportsUnicode ? 18 : 36;
   const height = 12;
-  scene1(width, height, terminalSupportsUnicode);
-  scene2(width, height, terminalSupportsUnicode);
+  scene1(width, height, terminalSupportsUnicode, () => {
+    scene2(width, height, terminalSupportsUnicode);
+  });
 }
 
 // Generate a single frame
@@ -105,8 +107,9 @@ function generateArticleFrame(sceneState, text, articleText) {
   return [
     `${sceneState.w}${sceneState.w.repeat(sceneState.width)}${sceneState.w}`,
     `${sceneState.w}${sceneState.s}\x1b[5m\x1b[32m${text}\x1b[0m${sceneState.s.repeat(repeatCount(sceneState, text.length))}${sceneState.w}`,
-    ...articleText.map(value =>
-      `${sceneState.w}${sceneState.s}${value}${sceneState.s.repeat(repeatCount(sceneState, value.length))}${sceneState.w}`
+    ...articleText.map(
+      (value) =>
+        `${sceneState.w}${sceneState.s}${value}${sceneState.s.repeat(repeatCount(sceneState, value.length))}${sceneState.w}`,
     ),
     ...Array(sceneState.height - 3 - articleText.length).fill(
       `${sceneState.w}${sceneState.s.repeat(sceneState.width)}${sceneState.w}`,
@@ -167,19 +170,43 @@ function startMatrixRain(sceneState, durationMs) {
   }, 100);
 }
 
-function scene1(width, height, terminalSupportsUnicode) {
+function scene1(width, height, terminalSupportsUnicode, onComplete) {
   const sceneState = new SceneState(width, height, terminalSupportsUnicode);
-  generateArticleFrame(sceneState, "Searching...", [
+  const searchFrames = [
+    "Searching ",
+    "Searching.",
+    "Searching.. ",
+    "Searching...",
+  ];
+  const articleLines = [
     "--------------------------------",
     "GLOBAL SEARCH ",
     "MORPHEUS ELUDES POLICE AT ",
     "HEATHROW AIRPORT",
     "Police have been unable to locate ",
     "Morpheus, who was last seen ",
-    "boarding a flight to Zion.",
-    "Authorities believe he may be ",
-    "trying to contact Trinity.",
-  ]).forEach((line) => console.log(line));
+    "at Heathrow airport. Authorities",
+    "believe he may be trying to ",
+    "attend the Github CLI challenge.",
+  ];
+  let frame = 0;
+  const interval = setInterval(() => {
+    console.clear();
+    console.log("\n\n");
+    const text = searchFrames[frame % searchFrames.length];
+    const linesToShow = articleLines.slice(
+      0,
+      Math.floor(frame / searchFrames.length) + 1,
+    );
+    generateArticleFrame(sceneState, text, linesToShow).forEach((line) =>
+      console.log(line),
+    );
+    frame++;
+    if (frame >= searchFrames.length * articleLines.length) {
+      clearInterval(interval);
+      if (onComplete) onComplete();
+    }
+  }, 200);
 }
 
 function scene2(width, height, terminalSupportsUnicode) {
@@ -215,5 +242,5 @@ function scene2(width, height, terminalSupportsUnicode) {
     runFrameSequence(sequences[0], delay, next);
   }
 
-  runAllSequences(frameSequences, 250);
+  runAllSequences(scene2FrameSequences, 250);
 }

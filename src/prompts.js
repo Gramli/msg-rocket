@@ -88,7 +88,7 @@ STANDARDS REPORT:
 - ...
 
 If no violations:
-STANDARDS REPORT: No violations found.
+output exactly: STANDARDS REPORT: No violations found.
 
 GIT DIFF:
 ${diff.trim()}
@@ -133,8 +133,7 @@ RULES:
 - Do NOT invent issues not present in the diff.
 - Do NOT mention Copilot, tools, or commands.
 - Do NOT include code snippets.
-- If there are no issues, output exactly:
-REVIEW REPORT: No issues found.
+- If there are no issues, output exactly: REVIEW REPORT: No issues found.
 
 GIT DIFF:
 ${diff.trim()}

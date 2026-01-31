@@ -137,6 +137,16 @@ export async function dropStash(stashRef = "stash@{0}") {
   }
 }
 
+export async function branchExistsRemotely(branch) {
+  try {
+    await execAsync('git fetch origin');
+    const { stdout: remote } = await execAsync(`git branch -r --list origin/${branch}`);
+    return !!remote.trim();
+  } catch (error) {
+    throw new Error(`Failed to check remote branch: ${error.message}`);
+  }
+}
+
 export async function commitChanges(message) {
   try {
     const messages = String(message)
