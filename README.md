@@ -19,6 +19,12 @@
 - **Git**: Installed and available in your PATH.
 - **GitHub Copilot CLI**: You must have the `copilot` command installed and authenticated.
 
+### Install via npm (Recommended)
+
+```bash
+npm install -g msg-rocket
+```
+
 ### Install from Source
 
 1. Clone the repository:

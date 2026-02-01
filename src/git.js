@@ -14,8 +14,12 @@ export async function isGitRepository() {
 
 export async function getStagedDiff() {
   try {
-    const { stdout } = await execAsync("git diff --staged");
-    return stdout;
+    const { stdout } = await execAsync(
+      'git diff --staged --minimal -w -U1 -- . ":(exclude)package-lock.json" ":(exclude)yarn.lock" ":(exclude)pnpm-lock.yaml" ":(exclude)*.min.js" ":(exclude)*.map" ":(exclude)*.svg"',
+    );
+    return stdout
+      .replace(/^index .*\r?\n/gm, "")
+      .replace(/^(new|deleted|old) (file )?mode .*\r?\n/gm, "");
   } catch (error) {
     throw new Error("Failed to get staged diff: " + error.message);
   }
