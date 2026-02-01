@@ -116,3 +116,11 @@ Ensure `teamCodingStandards` is set in your `.msgrocketrc`, then run:
 ```bash
 msg-rocket standard
 ```
+
+## Tips for Free Copilot Models
+When using **free Copilot models**, I noticed unstable behavior when passing prompts via files (e.g. `copilot -p @prompt.md`), including misinterpreting the file path as a user question.
+
+In practice, the CLI behaved **more consistently** when the **Reasoning Effort** was set to **High**:
+```bash
+/model gpt-5-mini high
+```
