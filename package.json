@@ -1,6 +1,6 @@
 {
   "name": "msg-rocket",
-  "version": "0.0.5",
+  "version": "0.0.8",
   "description": "A customized CLI assistant powered by GitHub Copilot CLI",
   "main": "bin/msg-rocket.js",
   "type": "module",

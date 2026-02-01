@@ -42,7 +42,7 @@ export function drawTieFighter(packageInfo) {
   const lines = [
     `${charset.k}${charset.s}${charset.s}${charset.s}${charset.s}${charset.s}${charset.s}${charset.s}${charset.s}${charset.k}`,
     `${charset.k}${charset.s}${charset.s}${charset.w}${charset.u}${charset.u}${charset.w}${charset.s}${charset.s}${charset.k}        \x1b[36m🚀 msg-rocket: ${packageInfo.description}\x1b[0m`,
-    `${charset.k}${charset.s}${charset.w}${charset.s}${charset.d}${charset.d}${charset.s}${charset.w}${charset.s}${charset.k}        \x1b[36m${textSpace}Start with command or use help\x1b[0m`,
+    `${charset.k}${charset.s}${charset.w}${charset.s}${charset.d}${charset.d}${charset.s}${charset.w}${charset.s}${charset.k}        \x1b[36m${textSpace}From diff to decision\x1b[0m`,
     `${charset.k}${charset.u}${charset.u}${charset.s}${charset.d}${charset.d}${charset.s}${charset.u}${charset.u}${charset.k}        \x1b[36m${terminalSupportsUnicode ? " " : ""}Version: v${packageInfo.version}\x1b[0m`,
     `${charset.k}${charset.s}${charset.w}${charset.s}${charset.d}${charset.d}${charset.s}${charset.w}${charset.s}${charset.k}        \x1b[36m${textSpace}Author: ${packageInfo.author}\x1b[0m`,
     `${charset.k}${charset.s}${charset.s}${charset.w}${charset.r}${charset.r}${charset.w}${charset.s}${charset.s}${charset.k}        \x1b[36m${textSpace}License: ${packageInfo.license}\x1b[0m`,
