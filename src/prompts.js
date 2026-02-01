@@ -1,19 +1,21 @@
 export const generateCommitMessagePrompt = (diff, template) => {
-  return `OUTPUT ONLY. NO EXPLANATIONS. NO ANALYSIS.
-Every single line MUST start with: -m
-Any line without -m prefix will break the parser.
-ONLY output -m lines. NOTHING else.
+  return `TASK: Generate git commit message flags from a diff.
 
-Example output format:
--m "feat: add feature"
--m "- implement authentication"
--m "- add tests"
+OUTPUT FORMAT (MANDATORY):
+- ONLY output lines starting with: -m
+- NO explanations, NO analysis, NO chat
+- Each line is a git -m flag
 
-RULES:
-- Use Conventional Commits (feat, fix, refactor, perf, test, docs, chore, build, ci, revert)
-- Summary: imperative, ≤72 chars, no period
-- If trivial: ONE -m line only
-- If complex: add body (max 3-4 bullets)
+WHAT TO DO:
+1. Analyze the diff
+2. Write commit message using Conventional Commits (feat, fix, refactor, perf, test, docs, chore, build, ci, revert)
+3. Output as -m lines only
+
+EXAMPLE OUTPUT:
+-m "feat: add user authentication"
+-m "- implement JWT validation"
+-m "- add login endpoint"
+
 ${
   template
     ? `TEMPLATE (follow exactly):\n${template}\n`
@@ -24,40 +26,45 @@ ${diff.trim()}`;
 };
 
 export const generateCleanReportPrompt = (diff) => {
-  return `OUTPUT ONLY LINES STARTING WITH: -c
-NO explanations. NO analysis. NO markdown. ONLY -c lines.
-Any output without -c prefix is INVALID.
+  return `TASK: Find debug artifacts and temporary code in a diff.
 
-Output format (STRICT):
+OUTPUT FORMAT (MANDATORY):
+- ONLY output lines starting with: -c
+- NO explanations, NO analysis, NO chat
+
+WHAT TO FIND:
+- console.log() with: debug, temp, test, TODO, FIXME
+- debugger statements
+- if (false) blocks
+- hardcoded dummy/test data
+- unused imports
+
+EXAMPLE OUTPUT:
 -c CLEAN REPORT:
 -c TO REMOVE:
--c <file>:<line> <description>
--c POTENTIAL:
--c <file>:<line> <description>
-
-If nothing found:
--c CLEAN REPORT: Nothing to remove.
-
-ONLY report:
-- console.log() with: debug, temp, test, TODO, FIXME
-- debugger;
-- if (false) blocks
-- hardcoded dummy data
+-c src/app.js:45 console.log with TODO
+-c src/server.js:12 hardcoded test user object
 
 GIT DIFF:
 ${diff.trim()}`;
 };
 
 export const codingStandardsPrompt = (diff, rules) => {
-  return `OUTPUT ONLY LINES STARTING WITH: -s
-NO explanations. NO analysis. NO markdown. ONLY -s lines.
+  return `TASK: Check if code violates team coding standards.
 
-Output format (STRICT):
+OUTPUT FORMAT (MANDATORY):
+- ONLY output lines starting with: -s
+- NO explanations, NO analysis, NO chat
+
+WHAT TO DO:
+1. Read the team standards below
+2. Check if the diff violates any rule
+3. Report violations as -s lines only
+
+EXAMPLE OUTPUT:
 -s STANDARDS REPORT:
--s <file>:<line> <rule> <description>
-
-If no violations:
--s STANDARDS REPORT: No violations found.
+-s src/api.js:10 missing error handling: should use try-catch
+-s src/utils.js:5 naming convention: use camelCase not snake_case
 
 TEAM CODING STANDARDS:
 ${rules}
@@ -74,26 +81,29 @@ export const reviewPrompt = (diff, focus = "clean") => {
         ? "PERFORMANCE"
         : "SECURITY";
 
-  const focusText =
+  const focusDescription =
     focus === "clean"
-      ? "readability, maintainability, naming, duplication, code smells"
+      ? "Find readability, maintainability, naming, duplication, code smells"
       : focus === "perf"
-        ? "complexity, loops, allocations, unnecessary work"
-        : "input validation, injection, secrets, auth, data exposure";
+        ? "Find complexity, inefficient loops, allocations, unnecessary work"
+        : "Find input validation gaps, injection risks, secrets, auth/authorization issues";
 
-  return `OUTPUT ONLY LINES STARTING WITH: -r
-NO explanations. NO analysis. NO markdown. ONLY -r lines.
+  return `TASK: Review code diff for ${focusDescription}.
 
-Output format (STRICT):
+OUTPUT FORMAT (MANDATORY):
+- ONLY output lines starting with: -r
+- NO explanations, NO analysis, NO chat
+
+WHAT TO DO:
+1. Analyze the diff for ${focusDescription}
+2. Report issues as -r lines with severity [LOW/MEDIUM/HIGH]
+3. Include file:line and description only
+
+EXAMPLE OUTPUT:
 -r ${focusTitle} REVIEW REPORT:
--r [<severity>] <file>:<line> <issue>
-
-Severity: [LOW, MEDIUM, HIGH]
-
-If no issues:
--r REVIEW REPORT: No issues found.
-
-FOCUS: ${focusText}
+-r [HIGH] src/auth.js:12 hardcoded password in plaintext
+-r [MEDIUM] src/api.js:5 missing error handling
+-r [LOW] src/utils.js:20 variable name unclear
 
 GIT DIFF:
 ${diff.trim()}`;
