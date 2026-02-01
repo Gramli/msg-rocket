@@ -1,99 +1,69 @@
 export const generateCommitMessagePrompt = (diff, template) => {
-  return `Analyze the staged diff and generate commit message parts (-m "...").
+  return `OUTPUT ONLY. NO EXPLANATIONS. NO ANALYSIS.
+Every single line MUST start with: -m
+Any line without -m prefix will break the parser.
+ONLY output -m lines. NOTHING else.
 
-EXECUTION MODE:
-- NON-INTERACTIVE
-- Output only. No questions. No explanations.
+Example output format:
+-m "feat: add feature"
+-m "- implement authentication"
+-m "- add tests"
 
-OUTPUT RULES:
-- Output ONLY lines starting exactly with: -m
-- Do NOT output git commit
-- Do NOT add extra text or blank lines
-
+RULES:
+- Use Conventional Commits (feat, fix, refactor, perf, test, docs, chore, build, ci, revert)
+- Summary: imperative, ≤72 chars, no period
+- If trivial: ONE -m line only
+- If complex: add body (max 3-4 bullets)
 ${
   template
-    ? `
-FORMAT:
-Use EXACTLY this output template.
-Follow it line-by-line.
-Omit lines with no content.
-Do NOT add, rename, or reorder lines.
-
-${template}
-`
+    ? `TEMPLATE (follow exactly):\n${template}\n`
     : ""
 }
-
-SEMANTICS (MANDATORY):
-- Use Conventional Commits
-- Allowed types: feat, fix, refactor, perf, test, docs, chore, build, ci, revert
-- Scope: infer from filenames or omit
-- Summary: imperative, ≤72 chars, no period
-
-SIMPLICITY RULE (MANDATORY):
-- If the diff is trivial or self-explanatory, output ONLY one -m summary line.
-- Do NOT add a body for simple changes such as logging, formatting, comments, or minor guards.
-
-BODY (OPTIONAL):
-- Maximum 3-4 bullets
-- Describe WHAT and WHY, not HOW
-- Omit if redundant
-
 GIT DIFF:
-${diff.trim()}
-`;
+${diff.trim()}`;
 };
 
 export const generateCleanReportPrompt = (diff) => {
-  return `Analyze the staged diff and report debug artifacts and temporary code.
+  return `OUTPUT ONLY LINES STARTING WITH: -c
+NO explanations. NO analysis. NO markdown. ONLY -c lines.
+Any output without -c prefix is INVALID.
 
-Do NOT remove or modify any code.
-
-Report only these items:
-- console.log(...) if it contains: debug, temp, test, TODO, FIXME or is obviously temporary
-- debugger;
-- if (false) { ... } blocks (temporary code)
-- hardcoded dummy data or mock objects (e.g., const user = { id: 1, name: 'test' })
-- unused imports/usings (only if clearly unused in the diff)
-
-Output format (exact):
-- Output ONLY lines starting exactly with: -c
-CLEAN REPORT:
-TO REMOVE:
+Output format (STRICT):
+-c CLEAN REPORT:
+-c TO REMOVE:
 -c <file>:<line> <description>
--c ...
-POTENTIAL:
+-c POTENTIAL:
 -c <file>:<line> <description>
 
-If nothing removed and no potential items:
+If nothing found:
 -c CLEAN REPORT: Nothing to remove.
+
+ONLY report:
+- console.log() with: debug, temp, test, TODO, FIXME
+- debugger;
+- if (false) blocks
+- hardcoded dummy data
 
 GIT DIFF:
 ${diff.trim()}`;
 };
 
 export const codingStandardsPrompt = (diff, rules) => {
-  return `You are a CLI tool that checks coding standards.
+  return `OUTPUT ONLY LINES STARTING WITH: -s
+NO explanations. NO analysis. NO markdown. ONLY -s lines.
 
-Do NOT modify code. Only analyze the staged diff.
+Output format (STRICT):
+-s STANDARDS REPORT:
+-s <file>:<line> <rule> <description>
+
+If no violations:
+-s STANDARDS REPORT: No violations found.
 
 TEAM CODING STANDARDS:
 ${rules}
-TEAM CODING STANDARDS END
-
-Output format (exact):
-- Output ONLY lines starting exactly with: -s
-STANDARDS REPORT:
--s <file>:<line> <rule> <description>
--s ...
-
-If no violations:
-output exactly: -s STANDARDS REPORT: No violations found.
-Do NOT use markdown formatting (no **bold**).
 
 GIT DIFF:
-${diff.trim()}
-`;
+${diff.trim()}`;
 };
 
 export const reviewPrompt = (diff, focus = "clean") => {
@@ -106,37 +76,25 @@ export const reviewPrompt = (diff, focus = "clean") => {
 
   const focusText =
     focus === "clean"
-      ? "Focus on clean code: readability, maintainability, naming, duplication, and code smells."
+      ? "readability, maintainability, naming, duplication, code smells"
       : focus === "perf"
-        ? "Focus on performance: complexity, inefficient loops, allocations, and unnecessary work."
-        : "Focus on security: input validation, injection risks, secrets, auth/authorization, and data exposure.";
+        ? "complexity, loops, allocations, unnecessary work"
+        : "input validation, injection, secrets, auth, data exposure";
 
-  return `You are a senior software engineer doing a focused code review.
+  return `OUTPUT ONLY LINES STARTING WITH: -r
+NO explanations. NO analysis. NO markdown. ONLY -r lines.
 
-FOCUS:
-${focusText}
+Output format (STRICT):
+-r ${focusTitle} REVIEW REPORT:
+-r [<severity>] <file>:<line> <issue>
 
-TASK:
-Review the staged git diff and produce a concise report of issues and improvements.
-Only include items that are clearly visible in the diff.
+Severity: [LOW, MEDIUM, HIGH]
 
-OUTPUT FORMAT (exact):
-- Output ONLY lines starting exactly with: -r
-${focusTitle} REVIEW REPORT:
--r [<severity>] <file>:<line> <issue description>
--r [<severity>] <file>:<line> <suggested improvement>
-...
+If no issues:
+-r REVIEW REPORT: No issues found.
 
-Severity levels: [LOW, MEDIUM, HIGH]
-
-RULES:
-- Do NOT output any explanations, markdown, or extra text.
-- Do NOT invent issues not present in the diff.
-- Do NOT mention Copilot, tools, or commands.
-- Do NOT include code snippets.
-- If there are no issues, output exactly: -r REVIEW REPORT: No issues found.
+FOCUS: ${focusText}
 
 GIT DIFF:
-${diff.trim()}
-`;
+${diff.trim()}`;
 };
