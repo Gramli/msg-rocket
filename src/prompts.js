@@ -60,13 +60,13 @@ Output format (exact):
 - Output ONLY lines starting exactly with: -c
 CLEAN REPORT:
 TO REMOVE:
-- <file>:<line> <description>
-- ...
+-c <file>:<line> <description>
+-c ...
 POTENTIAL:
-- <file>:<line> <description>
+-c <file>:<line> <description>
 
 If nothing removed and no potential items:
-CLEAN REPORT: Nothing to remove.
+-c CLEAN REPORT: Nothing to remove.
 
 GIT DIFF:
 ${diff.trim()}`;
@@ -84,11 +84,12 @@ TEAM CODING STANDARDS END
 Output format (exact):
 - Output ONLY lines starting exactly with: -s
 STANDARDS REPORT:
-- <file>:<line> <rule> <description>
-- ...
+-s <file>:<line> <rule> <description>
+-s ...
 
 If no violations:
-output exactly: STANDARDS REPORT: No violations found.
+output exactly: -s STANDARDS REPORT: No violations found.
+Do NOT use markdown formatting (no **bold**).
 
 GIT DIFF:
 ${diff.trim()}
@@ -122,8 +123,8 @@ Only include items that are clearly visible in the diff.
 OUTPUT FORMAT (exact):
 - Output ONLY lines starting exactly with: -r
 ${focusTitle} REVIEW REPORT:
-- [<severity>] <file>:<line> <issue description>
-- [<severity>] <file>:<line> <suggested improvement>
+-r [<severity>] <file>:<line> <issue description>
+-r [<severity>] <file>:<line> <suggested improvement>
 ...
 
 Severity levels: [LOW, MEDIUM, HIGH]
@@ -133,7 +134,7 @@ RULES:
 - Do NOT invent issues not present in the diff.
 - Do NOT mention Copilot, tools, or commands.
 - Do NOT include code snippets.
-- If there are no issues, output exactly: REVIEW REPORT: No issues found.
+- If there are no issues, output exactly: -r REVIEW REPORT: No issues found.
 
 GIT DIFF:
 ${diff.trim()}
