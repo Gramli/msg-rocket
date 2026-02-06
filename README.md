@@ -132,6 +132,9 @@ The following items describe potential future enhancements based on real usage a
 - [ ] **Token-efficient prompts**  
   Further reduce prompt size and Copilot processing time by dynamically trimming diffs, collapsing trivial changes, and reusing shared prompt fragments across commands.
 
+- [ ] **Branch name generation**
+   Generate meaningful git branch names from staged changes with optional prefix/postfix.
+
 - [ ] **Command chaining**  
   Allow combining multiple operations in a single run (e.g. `review → clean → commit`) while reusing context to avoid repeated Copilot calls.
 
