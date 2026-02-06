@@ -1,8 +1,8 @@
-# msg-rocket
+# :rocket: msg-rocket
 
 `msg-rocket` is a customized CLI assistant powered by GitHub Copilot CLI. It streamlines your git workflow by leveraging AI to generate commit messages, conduct code reviews, ensuring your branches stay up-to-date, and enforcing team coding standards.
 
-## Features
+## ✨ Features
 
 - **AI-Generated Commit Messages**: Automatically analyzes staged changes and generates descriptive commit messages using GitHub Copilot.
 - **Code Reviews**: Performs AI-driven code reviews on your staged changes, with optional focus on performance or security.
@@ -11,7 +11,7 @@
 - **Smart Syncing**: Keeps your branches up-to-date with the remote main branch, handling stashes and rebases automatically.
 - **Easter Egg**: Includes a fun Matrix-style digital rain effect.
 
-## Installation
+## ⚙️ Installation
 
 ### Prerequisites
 
@@ -40,7 +40,7 @@ npm install -g msg-rocket
 
 Now you can run the tool using the `msg-rocket` command.
 
-## Usage
+## :computer: Usage
 
 Run the tool from your terminal within a git repository:
 
@@ -67,7 +67,7 @@ msg-rocket <command> [flags]
 
 - **`help`**: Displays help information.
 
-## Configuration
+## :hammer_and_wrench: Configuration
 
 You can configure `msg-rocket` by creating a `.msgrocketrc` file in your project root or user home directory. The file should contain valid JSON.
 
@@ -89,7 +89,7 @@ You can configure `msg-rocket` by creating a `.msgrocketrc` file in your project
 }
 ```
 
-## Examples
+## :test_tube: Examples
 
 **Generate a commit message with ticket references:**
 
@@ -117,10 +117,30 @@ Ensure `teamCodingStandards` is set in your `.msgrocketrc`, then run:
 msg-rocket standard
 ```
 
-## Tips for Free Copilot Models
+## :zap: Tips for Free Copilot Models
 When using **free Copilot models**, I noticed unstable behavior when passing prompts via files (e.g. `copilot -p @prompt.md`), including misinterpreting the file path as a user question.
 
 In practice, the CLI behaved **more consistently** when the **Reasoning Effort** was set to **High**:
 ```bash
 /model gpt-5-mini high
 ```
+
+## :memo: Planned Improvements
+
+The following items describe potential future enhancements based on real usage and performance considerations:
+
+- [ ] **Token-efficient prompts**  
+  Further reduce prompt size and Copilot processing time by dynamically trimming diffs, collapsing trivial changes, and reusing shared prompt fragments across commands.
+
+- [ ] **Command chaining**  
+  Allow combining multiple operations in a single run (e.g. `review → clean → commit`) while reusing context to avoid repeated Copilot calls.
+
+- [ ] **Partial diff analysis**  
+  Support analyzing selected files or hunks to improve performance on large repositories and provide more targeted feedback.
+
+- [ ] **Optional Git hook integration**  
+  Enable lightweight pre-commit or pre-push checks using existing commands, fully opt-in.
+
+- [ ] **Context reuse between commands**  
+  Share analysis results across commands (e.g. commit + review) to minimize repeated reasoning and token usage.
+
